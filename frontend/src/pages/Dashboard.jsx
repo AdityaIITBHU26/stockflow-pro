@@ -12,8 +12,8 @@ const COLORS = ['#f59e0b', '#3b82f6', '#8b5cf6', '#10b981', '#ef4444']
 export default function Dashboard() {
   const { data, isLoading, isError } = useDashboard()
   const { data: ordersData } = useQuery({
-    queryKey: ['orders', { limit: 1000 }],
-    queryFn: () => orderApi.getAll({ limit: 1000 }),
+    queryKey: ['orders', { limit: 100 }],
+    queryFn: () => orderApi.getAll({ limit: 100 }),
     staleTime: 60000,
   })
 
