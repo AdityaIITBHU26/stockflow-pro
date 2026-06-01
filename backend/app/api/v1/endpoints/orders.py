@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Query, HTTPException, Request
 from app.api.deps import get_order_service
 from app.schemas.common import ResponseModel, PaginatedResponse
-from app.schemas.order import OrderCreate, OrderResponse
+from app.schemas.order import OrderCreate, OrderResponse, OrderStatusUpdate
 from app.services.order_service import OrderService
 from app.exceptions import NotFoundException, StockFlowException
 from slowapi import Limiter
@@ -67,6 +67,26 @@ async def get_order(
         }
     except NotFoundException as e:
         raise HTTPException(status_code=404, detail=e.message)
+
+@router.put("/{order_id}/status", response_model=ResponseModel)
+@limiter.limit("30/minute")
+async def update_order_status(
+    request: Request,
+    order_id: int,
+    status_in: OrderStatusUpdate,
+    service: OrderService = Depends(get_order_service),
+):
+    try:
+        order = service.update_status(order_id, status_in.status)
+        return {
+            "success": True,
+            "message": "Order status updated",
+            "data": OrderResponse.model_validate(order).model_dump(),
+        }
+    except NotFoundException as e:
+        raise HTTPException(status_code=404, detail=e.message)
+    except StockFlowException as e:
+        raise HTTPException(status_code=e.status_code, detail=e.message)
 
 @router.delete("/{order_id}", response_model=ResponseModel)
 @limiter.limit("30/minute")

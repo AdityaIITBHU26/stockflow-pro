@@ -60,6 +60,8 @@ class OrderService:
             # Refresh to load relationships
             return self.order_repo.get_by_id(order.id)
 
+    def update_status(self, order_id: int, new_status: OrderStatus) -> Order:        order = self.get_order(order_id)        if order.status in [OrderStatus.CANCELLED, OrderStatus.COMPLETED]:            raise StockFlowException("Cannot change status of a cancelled or completed order")        return self.order_repo.update_status(order, new_status)
+
     def cancel_order(self, order_id: int) -> Order:
         order = self.get_order(order_id)
         if order.status in [OrderStatus.CANCELLED, OrderStatus.COMPLETED]:

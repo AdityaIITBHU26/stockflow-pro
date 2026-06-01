@@ -10,6 +10,9 @@ export const orderApi = {
   create(data) {
     return api.post('/orders/', data)
   },
+  updateStatus(id, status) {
+    return api.put(`/orders/${id}/status`, { status })
+  },
   cancel(id) {
     return api.delete(`/orders/${id}`)
   },
