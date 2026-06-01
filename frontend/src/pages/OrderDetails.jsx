@@ -1,11 +1,11 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useOrder, useCancelOrder } from '../hooks/useOrders'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { orderApi } from '../api/orders'
 import Button from '../components/ui/Button'
 import Badge from '../components/ui/Badge'
 import Skeleton from '../components/ui/Skeleton'
 import { ArrowLeft, XCircle } from 'lucide-react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { orderApi } from '../api/orders'
 import toast from 'react-hot-toast'
 
 export default function OrderDetails() {
@@ -31,7 +31,7 @@ export default function OrderDetails() {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="sm" onClick={() => navigate(-1)}><ArrowLeft size={16} /></Button>
+        <Button variant="ghost" size="sm" onClick={() => navigate('/orders')}><ArrowLeft size={16} /></Button>
         <h1 className="text-2xl font-bold">Order #{order.id}</h1>
         <Badge status={order.status} />
       </div>
@@ -40,6 +40,7 @@ export default function OrderDetails() {
         <p><span className="font-medium">Date:</span> {new Date(order.created_at).toLocaleString()}</p>
         <p><span className="font-medium">Total:</span> ${parseFloat(order.total_amount).toFixed(2)}</p>
       </div>
+
       {order.status !== 'cancelled' && order.status !== 'completed' && (
         <div className="bg-white rounded-lg border p-4">
           <label className="block text-sm font-medium mb-2">Update Status</label>
@@ -53,9 +54,10 @@ export default function OrderDetails() {
             <option value="processing">Processing</option>
             <option value="completed">Completed</option>
           </select>
-          {updateStatusMutation.isLoading && <span className="ml-2 text-sm">Updating...</span>}
+          {updateStatusMutation.isLoading && <span className="ml-2 text-sm text-slate-500">Updating...</span>}
         </div>
       )}
+
       <div className="bg-white rounded-lg border p-4">
         <h3 className="font-semibold mb-2">Items</h3>
         <table className="w-full text-sm">
@@ -74,6 +76,7 @@ export default function OrderDetails() {
           </tbody>
         </table>
       </div>
+
       {order.status !== 'cancelled' && order.status !== 'completed' && (
         <Button variant="danger" onClick={() => cancelMutation.mutate(order.id)}>
           <XCircle size={16} className="mr-1" /> Cancel Order

@@ -5,32 +5,23 @@ import Button from '../components/ui/Button'
 import Modal from '../components/ui/Modal'
 import ProductForm from '../components/products/ProductForm'
 import Input from '../components/ui/Input'
-import toast from 'react-hot-toast'
-import { Plus, Pencil, Trash2 } from 'lucide-react'
+import { Plus, Pencil, Trash2, Download } from 'lucide-react'
+import { exportToCSV } from '../utils/exportCSV'
 
 export default function Products() {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('')
-  const [sortBy, setSortBy] = useState('id')
-  const [sortOrder, setSortOrder] = useState('asc')
   const [modalOpen, setModalOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState(null)
 
-  const { data, isLoading } = useProducts({ page, limit: 20, search, category, sort_by: sortBy, sort_order: sortOrder })
+  const { data, isLoading } = useProducts({ page, limit: 20, search, category })
   const createMutation = useCreateProduct()
   const updateMutation = useUpdateProduct()
   const deleteMutation = useDeleteProduct()
 
-  const handleCreate = async (formData) => {
-    await createMutation.mutateAsync(formData)
-    setModalOpen(false)
-  }
-  const handleUpdate = async (formData) => {
-    await updateMutation.mutateAsync({ id: editingProduct.id, data: formData })
-    setEditingProduct(null)
-    setModalOpen(false)
-  }
+  const handleCreate = async (formData) => { await createMutation.mutateAsync(formData); setModalOpen(false) }
+  const handleUpdate = async (formData) => { await updateMutation.mutateAsync({ id: editingProduct.id, data: formData }); setEditingProduct(null); setModalOpen(false) }
 
   const columns = [
     { header: 'Name', accessor: 'name' },
@@ -38,19 +29,30 @@ export default function Products() {
     { header: 'Category', accessor: 'category' },
     { header: 'Price', accessor: 'price', render: (row) => `$${parseFloat(row.price).toFixed(2)}` },
     { header: 'Stock', accessor: 'quantity_in_stock', render: (row) => <span className={row.quantity_in_stock <= 5 ? 'text-red-600 font-medium' : ''}>{row.quantity_in_stock}</span> },
-    { header: '', accessor: 'actions', render: (row) => (
-      <div className="flex gap-2">
-        <Button variant="ghost" size="sm" onClick={() => { setEditingProduct(row); setModalOpen(true) }}><Pencil size={14} /></Button>
-        <Button variant="ghost" size="sm" onClick={() => deleteMutation.mutate(row.id)}><Trash2 size={14} /></Button>
-      </div>
-    )},
+    {
+      header: '',
+      accessor: 'actions',
+      render: (row) => (
+        <div className="flex gap-2">
+          <Button variant="ghost" size="sm" onClick={() => { setEditingProduct(row); setModalOpen(true) }}><Pencil size={14} /></Button>
+          <Button variant="ghost" size="sm" onClick={() => deleteMutation.mutate(row.id)}><Trash2 size={14} /></Button>
+        </div>
+      ),
+    },
   ]
+
+  const handleExport = () => {
+    if (data?.data) exportToCSV(data.data, 'products.csv')
+  }
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Products</h1>
-        <Button onClick={() => { setEditingProduct(null); setModalOpen(true) }}><Plus size={16} className="mr-1" /> Add Product</Button>
+        <div className="flex gap-2">
+          <Button variant="secondary" onClick={handleExport}><Download size={16} className="mr-1" /> Export</Button>
+          <Button onClick={() => { setEditingProduct(null); setModalOpen(true) }}><Plus size={16} className="mr-1" /> Add Product</Button>
+        </div>
       </div>
       <div className="flex gap-4 flex-wrap">
         <Input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-xs" />
@@ -58,6 +60,8 @@ export default function Products() {
           <option value="">All Categories</option>
           <option value="Electronics">Electronics</option>
           <option value="Clothing">Clothing</option>
+          <option value="Food">Food</option>
+          <option value="Books">Books</option>
         </select>
       </div>
       <Table columns={columns} data={data?.data} isLoading={isLoading} />

@@ -6,16 +6,32 @@ import Button from '../components/ui/Button'
 import Modal from '../components/ui/Modal'
 import OrderForm from '../components/orders/OrderForm'
 import Badge from '../components/ui/Badge'
-import { Plus, Eye, XCircle } from 'lucide-react'
+import { Plus, Eye, XCircle, Download } from 'lucide-react'
+import toast from 'react-hot-toast'
+import { exportToCSV } from '../utils/exportCSV'
 
 export default function Orders() {
   const [page, setPage] = useState(1)
   const [statusFilter, setStatusFilter] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
-  const { data, isLoading, isError, error } = useOrders({ page, limit: 20, status: statusFilter })
+  const navigate = useNavigate()
+
+  const params = { page, limit: 20 }
+  if (statusFilter) params.status = statusFilter
+
+  const { data, isLoading, isError, error } = useOrders(params)
   const createMutation = useCreateOrder()
   const cancelMutation = useCancelOrder()
-  const navigate = useNavigate()
+
+  if (isError) {
+    return (
+      <div className="p-4 text-red-600">
+        Failed to load orders: {error.message}
+        <br />
+        <button onClick={() => window.location.reload()} className="underline mt-2">Retry</button>
+      </div>
+    )
+  }
 
   const orders = data?.data || []
 
@@ -32,7 +48,15 @@ export default function Orders() {
         <div className="flex gap-1">
           <Button variant="ghost" size="sm" onClick={() => navigate(`/orders/${row.id}`)}><Eye size={14} /></Button>
           {row.status !== 'cancelled' && row.status !== 'completed' && (
-            <Button variant="ghost" size="sm" onClick={() => cancelMutation.mutate(row.id)}><XCircle size={14} /></Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                if (confirm('Cancel this order? Stock will be restored.')) cancelMutation.mutate(row.id)
+              }}
+            >
+              <XCircle size={14} />
+            </Button>
           )}
         </div>
       ),
@@ -44,22 +68,20 @@ export default function Orders() {
       await createMutation.mutateAsync(formData)
       setModalOpen(false)
     } catch (err) {
-      console.error(err)
+      toast.error(err.message)
     }
   }
-
-  if (isError) return <div className="text-red-500">Error loading orders: {error.message}</div>
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between">
         <h1 className="text-2xl font-bold">Orders</h1>
-        <Button onClick={() => setModalOpen(true)}><Plus size={16} className="mr-1" /> New Order</Button>
+        <div className="flex gap-2"><Button variant="secondary" onClick={() => { if (orders.length) exportToCSV(orders, 'orders.csv') }}><Download size={16} className="mr-1" /> Export</Button><Button onClick={() => setModalOpen(true)}><Plus size={16} className="mr-1" /> New Order</Button></div>
       </div>
       <div className="flex gap-4">
         <select
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
+          onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
           className="rounded-md border border-slate-300 px-3 py-2 text-sm"
         >
           <option value="">All Statuses</option>
@@ -71,16 +93,10 @@ export default function Orders() {
         </select>
       </div>
       <Table columns={columns} data={orders} isLoading={isLoading} />
-      <div className="flex justify-between">
-        <Button variant="secondary" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>Previous</Button>
+      <div className="flex justify-between items-center">
+        <Button variant="secondary" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>Previous</Button>
         <span className="text-sm text-slate-500">Page {page} (Total: {data?.total || 0})</span>
-        <Button
-          variant="secondary"
-          disabled={!orders || orders.length < 20}
-          onClick={() => setPage((p) => p + 1)}
-        >
-          Next
-        </Button>
+        <Button variant="secondary" disabled={orders.length < 20} onClick={() => setPage(p => p + 1)}>Next</Button>
       </div>
 
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title="New Order">

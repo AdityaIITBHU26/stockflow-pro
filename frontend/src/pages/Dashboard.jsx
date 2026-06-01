@@ -3,6 +3,9 @@ import Card from '../components/ui/Card'
 import { Package, Users, ShoppingCart, DollarSign } from 'lucide-react'
 import Skeleton from '../components/ui/Skeleton'
 import Badge from '../components/ui/Badge'
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts'
+
+const COLORS = ['#f59e0b', '#3b82f6', '#8b5cf6', '#10b981', '#ef4444']
 
 export default function Dashboard() {
   const { data, isLoading, isError } = useDashboard()
@@ -10,6 +13,15 @@ export default function Dashboard() {
   if (isError || !data?.success) return <div className="text-red-500">Error loading dashboard</div>
 
   const stats = data.data
+
+  // Prepare chart data from status breakdown
+  const chartData = stats.order_status_breakdown
+    ? Object.entries(stats.order_status_breakdown).map(([status, count]) => ({
+        name: status,
+        value: count,
+      }))
+    : []
+
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-slate-800">Dashboard</h1>
@@ -51,7 +63,7 @@ export default function Dashboard() {
           </div>
         </Card>
       </div>
-      {/* Low stock alerts */}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card title="Low Stock Products">
           {stats.low_stock_products.length > 0 ? (
@@ -75,6 +87,35 @@ export default function Dashboard() {
               </div>
             </div>
           ))}
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <Card title="Order Status Breakdown">
+          {chartData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={250}>
+              <PieChart>
+                <Pie data={chartData} cx="50%" cy="50%" outerRadius={80} fill="#8884d8" dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                  {chartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : <p className="text-sm text-slate-500">No orders yet</p>}
+        </Card>
+        <Card title="Top Selling Products">
+          {stats.top_selling_products?.length > 0 ? (
+            <ul className="space-y-2">
+              {stats.top_selling_products.map((p, idx) => (
+                <li key={idx} className="flex justify-between text-sm">
+                  <span>{p.name}</span>
+                  <span className="font-medium">{p.total_sold} sold</span>
+                </li>
+              ))}
+            </ul>
+          ) : <p className="text-sm text-slate-500">No sales data</p>}
         </Card>
       </div>
     </div>
