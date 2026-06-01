@@ -13,3 +13,6 @@ class OrderItem(Base):
 
     order = relationship("Order", back_populates="items")
     product = relationship("Product")
+@property
+def product_name(self):
+    return self.product.name if self.product else "Unknown"

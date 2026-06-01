@@ -21,3 +21,6 @@ class Order(Base):
 
     customer = relationship("Customer")
     items = relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")
+@property
+def customer_name(self):
+    return self.customer.full_name if self.customer else "Unknown"
