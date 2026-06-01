@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Package, Users, ShoppingCart } from 'lucide-react'
+import { LayoutDashboard, Package, Users, ShoppingCart, Settings } from 'lucide-react'
 import { useDashboard } from '../../hooks/useDashboard'
 
 const links = [
@@ -42,6 +42,21 @@ export default function Sidebar() {
           </NavLink>
         ))}
       </nav>
+      <div className="px-3 py-2 border-t border-slate-200 dark:border-slate-700">
+        <NavLink
+          to="/profile"
+          className={({ isActive }) =>
+            `flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+              isActive
+                ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400'
+                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+            }`
+          }
+        >
+          <Settings size={18} />
+          Profile
+        </NavLink>
+      </div>
     </aside>
   )
 }
