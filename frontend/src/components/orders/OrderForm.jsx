@@ -41,10 +41,16 @@ export default function OrderForm({ onSubmit, isLoading }) {
         </div>
         {fields.map((field, index) => (
           <div key={field.id} className="flex gap-2 items-end">
-            <select {...register(`items.${index}.product_id`, { required: true })} className="flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm">
-              <option value="">Select product</option>
-              {products.map(p => <option key={p.id} value={p.id}>{p.name} (${p.price})</option>)}
-            </select>
+            <div className="flex-1">
+              <select {...register(`items.${index}.product_id`, { required: true })} className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
+                <option value="">Select product</option>
+                {products.map(p => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} — ${p.price} (Stock: {p.quantity_in_stock})
+                  </option>
+                ))}
+              </select>
+            </div>
             <Input type="number" {...register(`items.${index}.quantity`, { required: true, min: 1 })} className="w-24" />
             <Button type="button" variant="ghost" size="sm" onClick={() => remove(index)}>✕</Button>
           </div>

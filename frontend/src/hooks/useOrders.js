@@ -3,10 +3,11 @@ import { orderApi } from '../api/orders'
 import toast from 'react-hot-toast'
 
 export function useOrders(params) {
-  // Remove empty filters before sending
   const cleanParams = { ...params }
   if (!cleanParams.status) delete cleanParams.status
   if (!cleanParams.search) delete cleanParams.search
+  if (!cleanParams.date_from) delete cleanParams.date_from
+  if (!cleanParams.date_to) delete cleanParams.date_to
 
   return useQuery({
     queryKey: ['orders', cleanParams],
@@ -28,7 +29,7 @@ export function useCreateOrder() {
   return useMutation({
     mutationFn: orderApi.create,
     onSuccess: () => {
-      qc.invalidateQueries('orders')
+      qc.invalidateQueries({ queryKey: ['orders'] })
       toast.success('Order placed')
     },
     onError: (err) => toast.error(err.message),
@@ -39,8 +40,9 @@ export function useCancelOrder() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: orderApi.cancel,
-    onSuccess: () => {
-      qc.invalidateQueries('orders')
+    onSuccess: (_, orderId) => {
+      qc.invalidateQueries({ queryKey: ['orders'] })
+      qc.invalidateQueries({ queryKey: ['order', orderId] })
       toast.success('Order cancelled')
     },
     onError: (err) => toast.error(err.message),

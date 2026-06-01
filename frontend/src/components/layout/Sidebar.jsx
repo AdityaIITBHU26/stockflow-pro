@@ -1,21 +1,25 @@
 import { NavLink } from 'react-router-dom'
 import { LayoutDashboard, Package, Users, ShoppingCart } from 'lucide-react'
+import { useDashboard } from '../../hooks/useDashboard'
 
 const links = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/products', icon: Package, label: 'Products' },
+  { to: '/products', icon: Package, label: 'Products', badgeQuery: true },
   { to: '/customers', icon: Users, label: 'Customers' },
   { to: '/orders', icon: ShoppingCart, label: 'Orders' },
 ]
 
 export default function Sidebar() {
+  const { data: dashData } = useDashboard()
+  const lowStockCount = dashData?.data?.low_stock_products?.length || 0
+
   return (
     <aside className="w-64 bg-white border-r border-slate-200 flex flex-col">
       <div className="h-16 flex items-center px-6 border-b border-slate-200">
         <span className="text-xl font-bold text-primary-600">StockFlow Pro</span>
       </div>
       <nav className="flex-1 py-4 space-y-1 px-3">
-        {links.map(({ to, icon: Icon, label }) => (
+        {links.map(({ to, icon: Icon, label, badgeQuery }) => (
           <NavLink
             key={to}
             to={to}
@@ -28,6 +32,11 @@ export default function Sidebar() {
           >
             <Icon size={18} />
             {label}
+            {badgeQuery && lowStockCount > 0 && (
+              <span className="ml-auto bg-red-100 text-red-600 text-xs font-semibold px-2 py-0.5 rounded-full">
+                {lowStockCount} low
+              </span>
+            )}
           </NavLink>
         ))}
       </nav>

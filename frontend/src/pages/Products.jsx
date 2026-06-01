@@ -1,21 +1,23 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct } from '../hooks/useProducts'
 import Table from '../components/ui/Table'
 import Button from '../components/ui/Button'
 import Modal from '../components/ui/Modal'
 import ProductForm from '../components/products/ProductForm'
 import Input from '../components/ui/Input'
-import { Plus, Pencil, Trash2, Download } from 'lucide-react'
+import { Plus, Pencil, Trash2, Download, ArrowUp, ArrowDown } from 'lucide-react'
 import { exportToCSV } from '../utils/exportCSV'
 
 export default function Products() {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('')
+  const [sortBy, setSortBy] = useState('id')
+  const [sortOrder, setSortOrder] = useState('asc')
   const [modalOpen, setModalOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState(null)
 
-  const { data, isLoading } = useProducts({ page, limit: 20, search, category })
+  const { data, isLoading } = useProducts({ page, limit: 20, search, category, sort_by: sortBy, sort_order: sortOrder })
   const createMutation = useCreateProduct()
   const updateMutation = useUpdateProduct()
   const deleteMutation = useDeleteProduct()
@@ -23,12 +25,21 @@ export default function Products() {
   const handleCreate = async (formData) => { await createMutation.mutateAsync(formData); setModalOpen(false) }
   const handleUpdate = async (formData) => { await updateMutation.mutateAsync({ id: editingProduct.id, data: formData }); setEditingProduct(null); setModalOpen(false) }
 
+  const handleSort = (column) => {
+    if (sortBy === column) {
+      setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortBy(column)
+      setSortOrder('asc')
+    }
+  }
+
   const columns = [
-    { header: 'Name', accessor: 'name' },
-    { header: 'SKU', accessor: 'sku' },
-    { header: 'Category', accessor: 'category' },
-    { header: 'Price', accessor: 'price', render: (row) => `$${parseFloat(row.price).toFixed(2)}` },
-    { header: 'Stock', accessor: 'quantity_in_stock', render: (row) => <span className={row.quantity_in_stock <= 5 ? 'text-red-600 font-medium' : ''}>{row.quantity_in_stock}</span> },
+    { header: 'Name', accessor: 'name', sortable: true },
+    { header: 'SKU', accessor: 'sku', sortable: true },
+    { header: 'Category', accessor: 'category', sortable: true },
+    { header: 'Price', accessor: 'price', render: (row) => `$${parseFloat(row.price).toFixed(2)}`, sortable: true },
+    { header: 'Stock', accessor: 'quantity_in_stock', render: (row) => <span className={row.quantity_in_stock <= 5 ? 'text-red-600 font-medium' : ''}>{row.quantity_in_stock}</span>, sortable: true },
     {
       header: '',
       accessor: 'actions',
@@ -64,7 +75,42 @@ export default function Products() {
           <option value="Books">Books</option>
         </select>
       </div>
-      <Table columns={columns} data={data?.data} isLoading={isLoading} />
+      <div className="overflow-x-auto border border-slate-200 rounded-lg">
+        <table className="min-w-full divide-y divide-slate-200">
+          <thead className="bg-slate-50">
+            <tr>
+              {columns.map((col) => (
+                <th
+                  key={col.accessor}
+                  className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer select-none"
+                  onClick={() => col.sortable && handleSort(col.accessor)}
+                >
+                  <div className="flex items-center gap-1">
+                    {col.header}
+                    {col.sortable && sortBy === col.accessor && (
+                      sortOrder === 'asc' ? <ArrowUp size={12} /> : <ArrowDown size={12} />
+                    )}
+                  </div>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-slate-200">
+            {data?.data?.map((row) => (
+              <tr key={row.id} className="hover:bg-slate-50 transition-colors">
+                {columns.map((col) => (
+                  <td key={col.accessor} className="px-4 py-3 text-sm text-slate-700">
+                    {col.render ? col.render(row) : row[col.accessor]}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {(!data?.data || data.data.length === 0) && (
+          <div className="p-6 text-center text-sm text-slate-500">No products found</div>
+        )}
+      </div>
       <div className="flex justify-between items-center">
         <Button variant="secondary" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>Previous</Button>
         <span className="text-sm text-slate-500">Page {page} (Total: {data?.total || 0})</span>
