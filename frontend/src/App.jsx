@@ -39,12 +39,7 @@ function App() {
             </Route>
           </Routes>
         </BrowserRouter>
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            className: 'text-sm',
-          }}
-        />
+        <Toaster position="top-right" toastOptions={{ className: 'text-sm' }} />
       </ThemeProvider>
     </QueryClientProvider>
   )
