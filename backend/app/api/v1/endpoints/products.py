@@ -108,3 +108,54 @@ async def delete_product(
         }
     except NotFoundException as e:
         raise HTTPException(status_code=404, detail=e.message)
+
+import csv
+import io
+from fastapi import UploadFile, File
+
+@router.post("/import", response_model=ResponseModel)
+@limiter.limit("10/minute")
+async def import_products(
+    request: Request,
+    file: UploadFile = File(...),
+    service: ProductService = Depends(get_product_service),
+):
+    try:
+        content = await file.read()
+        decoded = content.decode("utf-8")
+        reader = csv.DictReader(io.StringIO(decoded))
+        required_fields = {"name", "sku", "price", "quantity_in_stock"}
+        if not required_fields.issubset(reader.fieldnames or []):
+            raise HTTPException(status_code=400, detail=f"CSV must contain columns: {', '.join(required_fields)}")
+        
+        created = 0
+        errors = []
+        for row in reader:
+            try:
+                name = row["name"].strip()
+                sku = row["sku"].strip()
+                price = float(row["price"])
+                quantity = int(row["quantity_in_stock"])
+                if price <= 0 or quantity < 0:
+                    errors.append(f"Row {reader.line_num}: invalid price or quantity")
+                    continue
+                description = row.get("description", "").strip()
+                category = row.get("category", "").strip()
+                product_in = ProductCreate(
+                    name=name, sku=sku, description=description,
+                    category=category, price=price, quantity_in_stock=quantity
+                )
+                service.create_product(product_in)
+                created += 1
+            except DuplicateException:
+                errors.append(f"Row {reader.line_num}: SKU '{sku}' already exists")
+            except Exception as e:
+                errors.append(f"Row {reader.line_num}: {str(e)}")
+        
+        return {
+            "success": True,
+            "message": f"Imported {created} products",
+            "data": {"created": created, "errors": errors}
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))

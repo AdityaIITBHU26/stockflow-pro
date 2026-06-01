@@ -1,12 +1,14 @@
-import { useState, useCallback } from 'react'
+import { useState, useRef } from 'react'
 import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct } from '../hooks/useProducts'
-import Table from '../components/ui/Table'
 import Button from '../components/ui/Button'
 import Modal from '../components/ui/Modal'
 import ProductForm from '../components/products/ProductForm'
 import Input from '../components/ui/Input'
-import { Plus, Pencil, Trash2, Download, ArrowUp, ArrowDown } from 'lucide-react'
+import { Plus, Pencil, Trash2, Download, Upload, ArrowUp, ArrowDown } from 'lucide-react'
 import { exportToCSV } from '../utils/exportCSV'
+import { importProducts } from '../api/products'
+import toast from 'react-hot-toast'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 export default function Products() {
   const [page, setPage] = useState(1)
@@ -16,11 +18,22 @@ export default function Products() {
   const [sortOrder, setSortOrder] = useState('asc')
   const [modalOpen, setModalOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState(null)
+  const fileInputRef = useRef(null)
+  const queryClient = useQueryClient()
 
   const { data, isLoading } = useProducts({ page, limit: 20, search, category, sort_by: sortBy, sort_order: sortOrder })
   const createMutation = useCreateProduct()
   const updateMutation = useUpdateProduct()
   const deleteMutation = useDeleteProduct()
+  
+  const importMutation = useMutation({
+    mutationFn: importProducts,
+    onSuccess: (data) => {
+      toast.success(data.message)
+      queryClient.invalidateQueries({ queryKey: ['products'] })
+    },
+    onError: (err) => toast.error(err.message)
+  })
 
   const handleCreate = async (formData) => { await createMutation.mutateAsync(formData); setModalOpen(false) }
   const handleUpdate = async (formData) => { await updateMutation.mutateAsync({ id: editingProduct.id, data: formData }); setEditingProduct(null); setModalOpen(false) }
@@ -32,6 +45,13 @@ export default function Products() {
       setSortBy(column)
       setSortOrder('asc')
     }
+  }
+
+  const handleImportClick = () => fileInputRef.current?.click()
+  const handleFileChange = (e) => {
+    const file = e.target.files[0]
+    if (file) importMutation.mutate(file)
+    e.target.value = ''
   }
 
   const columns = [
@@ -62,6 +82,10 @@ export default function Products() {
         <h1 className="text-2xl font-bold">Products</h1>
         <div className="flex gap-2">
           <Button variant="secondary" onClick={handleExport}><Download size={16} className="mr-1" /> Export</Button>
+          <Button variant="secondary" onClick={handleImportClick} disabled={importMutation.isLoading}>
+            <Upload size={16} className="mr-1" /> {importMutation.isLoading ? 'Importing...' : 'Import'}
+          </Button>
+          <input ref={fileInputRef} type="file" accept=".csv" onChange={handleFileChange} className="hidden" />
           <Button onClick={() => { setEditingProduct(null); setModalOpen(true) }}><Plus size={16} className="mr-1" /> Add Product</Button>
         </div>
       </div>
