@@ -15,7 +15,7 @@ limiter = Limiter(key_func=get_remote_address)
 async def list_orders(
     request: Request,
     page: int = Query(1, ge=1),
-    limit: int = Query(20, ge=1, le=1000),
+    limit: int = Query(20, ge=1, le=10000),
     status: str = Query(None),
     search: str = Query(None),
     sort_by: str = Query("id", pattern="^(id|total_amount|created_at)$"),
