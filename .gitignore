@@ -1,0 +1,16 @@
+# Backend
+backend/.env
+backend/__pycache__/
+backend/*.pyc
+backend/.pytest_cache/
+backend/alembic.ini
+
+# Frontend
+frontend/.env
+frontend/node_modules/
+frontend/dist/
+frontend/.eslintcache
+
+# General
+.DS_Store
+.env
