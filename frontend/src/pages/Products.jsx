@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useMemo } from 'react'
 import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct } from '../hooks/useProducts'
 import Button from '../components/ui/Button'
 import Modal from '../components/ui/Modal'
@@ -19,7 +19,8 @@ export default function Products() {
   const [sortOrder, setSortOrder] = useState('asc')
   const [modalOpen, setModalOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState(null)
-  const [confirmDelete, setConfirmDelete] = useState(null) // product to delete
+  const [confirmDelete, setConfirmDelete] = useState(null) // single delete
+  const [selected, setSelected] = useState([]) // bulk delete
   const fileInputRef = useRef(null)
   const queryClient = useQueryClient()
 
@@ -56,7 +57,29 @@ export default function Products() {
     e.target.value = ''
   }
 
-  const columns = [
+  // Bulk delete logic
+  const toggleSelect = (id) => {
+    setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
+  }
+  const toggleSelectAll = () => {
+    if (data?.data && selected.length === data.data.length) {
+      setSelected([])
+    } else {
+      setSelected(data?.data?.map(p => p.id) || [])
+    }
+  }
+  const bulkDelete = () => {
+    selected.forEach(id => deleteMutation.mutate(id))
+    setSelected([])
+    toast.success(`Deleting ${selected.length} products...`)
+  }
+
+  const columns = useMemo(() => [
+    { header: (
+        <input type="checkbox" onChange={toggleSelectAll} checked={data?.data?.length > 0 && selected.length === data.data.length} />
+      ), accessor: 'select', render: (row) => (
+        <input type="checkbox" checked={selected.includes(row.id)} onChange={() => toggleSelect(row.id)} />
+      )},
     { header: 'Name', accessor: 'name', sortable: true },
     { header: 'SKU', accessor: 'sku', sortable: true },
     { header: 'Category', accessor: 'category', sortable: true },
@@ -72,7 +95,7 @@ export default function Products() {
         </div>
       ),
     },
-  ]
+  ], [selected, data?.data])
 
   const handleExport = () => {
     if (data?.data) exportToCSV(data.data, 'products.csv')
@@ -100,6 +123,9 @@ export default function Products() {
           <option value="Food">Food</option>
           <option value="Books">Books</option>
         </select>
+        {selected.length > 0 && (
+          <Button variant="danger" onClick={bulkDelete}><Trash2 size={16} className="mr-1" /> Delete {selected.length} selected</Button>
+        )}
       </div>
       <div className="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-lg">
         <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
