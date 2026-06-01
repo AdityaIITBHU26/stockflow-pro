@@ -3,9 +3,14 @@ import { orderApi } from '../api/orders'
 import toast from 'react-hot-toast'
 
 export function useOrders(params) {
+  // Remove empty filters before sending
+  const cleanParams = { ...params }
+  if (!cleanParams.status) delete cleanParams.status
+  if (!cleanParams.search) delete cleanParams.search
+
   return useQuery({
-    queryKey: ['orders', params],
-    queryFn: () => orderApi.getAll(params),
+    queryKey: ['orders', cleanParams],
+    queryFn: () => orderApi.getAll(cleanParams),
     keepPreviousData: true,
   })
 }
