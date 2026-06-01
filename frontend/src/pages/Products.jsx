@@ -4,6 +4,7 @@ import Button from '../components/ui/Button'
 import Modal from '../components/ui/Modal'
 import ProductForm from '../components/products/ProductForm'
 import Input from '../components/ui/Input'
+import ConfirmDialog from '../components/ui/ConfirmDialog'
 import { Plus, Pencil, Trash2, Download, Upload, ArrowUp, ArrowDown } from 'lucide-react'
 import { exportToCSV } from '../utils/exportCSV'
 import { importProducts } from '../api/products'
@@ -18,6 +19,7 @@ export default function Products() {
   const [sortOrder, setSortOrder] = useState('asc')
   const [modalOpen, setModalOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState(null)
+  const [confirmDelete, setConfirmDelete] = useState(null) // product to delete
   const fileInputRef = useRef(null)
   const queryClient = useQueryClient()
 
@@ -66,7 +68,7 @@ export default function Products() {
       render: (row) => (
         <div className="flex gap-2">
           <Button variant="ghost" size="sm" onClick={() => { setEditingProduct(row); setModalOpen(true) }}><Pencil size={14} /></Button>
-          <Button variant="ghost" size="sm" onClick={() => deleteMutation.mutate(row.id)}><Trash2 size={14} /></Button>
+          <Button variant="ghost" size="sm" onClick={() => setConfirmDelete(row)}><Trash2 size={14} /></Button>
         </div>
       ),
     },
@@ -79,7 +81,7 @@ export default function Products() {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Products</h1>
+        <h1 className="text-2xl font-bold dark:text-white">Products</h1>
         <div className="flex gap-2">
           <Button variant="secondary" onClick={handleExport}><Download size={16} className="mr-1" /> Export</Button>
           <Button variant="secondary" onClick={handleImportClick} disabled={importMutation.isLoading}>
@@ -91,7 +93,7 @@ export default function Products() {
       </div>
       <div className="flex gap-4 flex-wrap">
         <Input placeholder="Search..." value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-xs" />
-        <select value={category} onChange={(e) => setCategory(e.target.value)} className="rounded-md border border-slate-300 px-3 py-2 text-sm">
+        <select value={category} onChange={(e) => setCategory(e.target.value)} className="rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-3 py-2 text-sm">
           <option value="">All Categories</option>
           <option value="Electronics">Electronics</option>
           <option value="Clothing">Clothing</option>
@@ -99,14 +101,14 @@ export default function Products() {
           <option value="Books">Books</option>
         </select>
       </div>
-      <div className="overflow-x-auto border border-slate-200 rounded-lg">
-        <table className="min-w-full divide-y divide-slate-200">
-          <thead className="bg-slate-50">
+      <div className="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-lg">
+        <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
+          <thead className="bg-slate-50 dark:bg-slate-800">
             <tr>
               {columns.map((col) => (
                 <th
                   key={col.accessor}
-                  className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer select-none"
+                  className="px-4 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider cursor-pointer select-none"
                   onClick={() => col.sortable && handleSort(col.accessor)}
                 >
                   <div className="flex items-center gap-1">
@@ -119,11 +121,11 @@ export default function Products() {
               ))}
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-slate-200">
+          <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
             {data?.data?.map((row) => (
-              <tr key={row.id} className="hover:bg-slate-50 transition-colors">
+              <tr key={row.id} className="hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
                 {columns.map((col) => (
-                  <td key={col.accessor} className="px-4 py-3 text-sm text-slate-700">
+                  <td key={col.accessor} className="px-4 py-3 text-sm text-slate-700 dark:text-slate-300">
                     {col.render ? col.render(row) : row[col.accessor]}
                   </td>
                 ))}
@@ -132,12 +134,12 @@ export default function Products() {
           </tbody>
         </table>
         {(!data?.data || data.data.length === 0) && (
-          <div className="p-6 text-center text-sm text-slate-500">No products found</div>
+          <div className="p-6 text-center text-sm text-slate-500 dark:text-slate-400">No products found</div>
         )}
       </div>
       <div className="flex justify-between items-center">
         <Button variant="secondary" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>Previous</Button>
-        <span className="text-sm text-slate-500">Page {page} (Total: {data?.total || 0})</span>
+        <span className="text-sm text-slate-500 dark:text-slate-400">Page {page} (Total: {data?.total || 0})</span>
         <Button variant="secondary" disabled={!data?.data || data.data.length < 20} onClick={() => setPage(p => p + 1)}>Next</Button>
       </div>
 
@@ -148,6 +150,14 @@ export default function Products() {
           isLoading={createMutation.isLoading || updateMutation.isLoading}
         />
       </Modal>
+
+      <ConfirmDialog
+        isOpen={!!confirmDelete}
+        onClose={() => setConfirmDelete(null)}
+        onConfirm={() => deleteMutation.mutate(confirmDelete.id)}
+        title="Delete Product"
+        message={`Are you sure you want to delete ${confirmDelete?.name}?`}
+      />
     </div>
   )
 }

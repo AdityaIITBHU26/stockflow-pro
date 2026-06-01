@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'react-hot-toast'
+import { ThemeProvider } from './context/ThemeContext'
 import Layout from './components/layout/Layout'
 import Dashboard from './pages/Dashboard'
 import Products from './pages/Products'
@@ -21,23 +22,25 @@ const queryClient = new QueryClient({
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <Routes>
-          <Route element={<Layout />}>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/customers" element={<Customers />} />
-            <Route path="/orders" element={<Orders />} />
-            <Route path="/orders/:id" element={<OrderDetails />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          className: 'text-sm',
-        }}
-      />
+      <ThemeProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/products" element={<Products />} />
+              <Route path="/customers" element={<Customers />} />
+              <Route path="/orders" element={<Orders />} />
+              <Route path="/orders/:id" element={<OrderDetails />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            className: 'text-sm',
+          }}
+        />
+      </ThemeProvider>
     </QueryClientProvider>
   )
 }
