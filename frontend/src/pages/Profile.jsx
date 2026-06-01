@@ -57,24 +57,9 @@ export default function Profile() {
             <input id="logoInput" type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
           </label>
         </div>
-        <Input
-          label="Company Name"
-          name="name"
-          value={company.name}
-          onChange={handleChange}
-        />
-        <Input
-          label="Address"
-          name="address"
-          value={company.address}
-          onChange={handleChange}
-        />
-        <Input
-          label="Phone"
-          name="phone"
-          value={company.phone}
-          onChange={handleChange}
-        />
+        <Input label="Company Name" name="name" value={company.name} onChange={handleChange} />
+        <Input label="Address" name="address" value={company.address} onChange={handleChange} />
+        <Input label="Phone" name="phone" value={company.phone} onChange={handleChange} />
         <Button type="submit">
           <Save size={14} className="mr-1" /> Save Changes
         </Button>
