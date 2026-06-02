@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Numeric, DateTime, func
+from sqlalchemy import Column, Integer, String, Numeric, DateTime, ForeignKey, func
 from app.db.base import Base
 
 class Product(Base):
@@ -13,3 +13,8 @@ class Product(Base):
     quantity_in_stock = Column(Integer, nullable=False, default=0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    supplier_id = Column(Integer, ForeignKey("suppliers.id"), nullable=True)
+    reorder_point = Column(Integer, default=5)
+    reorder_quantity = Column(Integer, default=50)
+    version = Column(Integer, default=0, nullable=False)

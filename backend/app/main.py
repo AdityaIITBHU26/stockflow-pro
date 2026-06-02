@@ -6,8 +6,11 @@ from slowapi.errors import RateLimitExceeded
 from app.core.config import settings
 from app.core.logging import setup_logging
 from app.api.v1.endpoints import products, customers, orders, dashboard
+from app.api.v1.endpoints import auth, admin, suppliers, analytics, barcodes
 from app.db.base import Base
 from app.db.session import engine
+from app.api.v1.endpoints import auth
+app.include_router(auth.router, prefix=f"{settings.API_V1_STR}/auth", tags=["Auth"])
 
 setup_logging()
 
@@ -40,3 +43,8 @@ app.include_router(dashboard.router, prefix=f"{settings.API_V1_STR}/dashboard", 
 @app.get("/health")
 def health_check():
     return {"status": "healthy"}
+app.include_router(auth.router, prefix=f"{settings.API_V1_STR}/auth", tags=["Auth"])
+app.include_router(admin.router, prefix=f"{settings.API_V1_STR}/admin", tags=["Admin"])
+app.include_router(suppliers.router, prefix=f"{settings.API_V1_STR}/suppliers", tags=["Suppliers"])
+app.include_router(analytics.router, prefix=f"{settings.API_V1_STR}/analytics", tags=["Analytics"])
+app.include_router(barcodes.router, prefix=f"{settings.API_V1_STR}/barcodes", tags=["Barcodes"])
