@@ -14,234 +14,433 @@ Inventory & Order Management System.
 - Docker, Docker Compose -->
 # StockFlow Pro – Inventory & Order Management System
 
-A modern, full‑stack **Inventory & Order Management** SaaS platform built for small and medium businesses.  
+A modern, full-stack **Inventory & Order Management** SaaS platform built for small and medium businesses.
+
 Manage products, customers, orders, and inventory levels with a clean, responsive interface and powerful business automation.
+
+---
 
 ## 🌐 Live Application
 
-| Service       | URL                                                      |
-|---------------|----------------------------------------------------------|
-| **Frontend**  | [https://stockflow-pro-rho.vercel.app](https://stockflow-pro-rho.vercel.app) |
-| **Backend API** | [https://stockflow-backend-r0re.onrender.com](https://stockflow-backend-r0re.onrender.com) |
-| **Swagger Docs** | [https://stockflow-backend-r0re.onrender.com/docs](https://stockflow-backend-r0re.onrender.com/docs) |
-| **Docker Hub** | `adityaiitbhu26/stockflow-backend:latest` |
+| Service          | URL                                              |
+| ---------------- | ------------------------------------------------ |
+| **Frontend**     | https://stockflow-pro-rho.vercel.app             |
+| **Backend API**  | https://stockflow-backend-r0re.onrender.com      |
+| **Swagger Docs** | https://stockflow-backend-r0re.onrender.com/docs |
+| **Docker Hub**   | `adityaiitbhu26/stockflow-backend:latest`        |
 
 ---
 
 ## 🚀 What is StockFlow Pro?
 
-StockFlow Pro helps businesses **track inventory, process customer orders, and monitor operational performance** from a centralised dashboard.  
+StockFlow Pro helps businesses **track inventory, process customer orders, and monitor operational performance** from a centralized dashboard.
+
 It automatically calculates order totals, reduces stock when orders are placed, prevents overselling, and restores stock when orders are cancelled.
 
-Built with a production‑grade tech stack and deployed on free cloud platforms, it demonstrates real‑world software engineering practices.
+Built with a production-grade tech stack and deployed on free cloud platforms, it demonstrates real-world software engineering practices.
 
 ---
 
 ## 🎯 Target Users
 
-- **Retail stores** – manage physical product inventory and walk‑in orders.
-- **E‑commerce sellers** – keep online product listings in sync with actual stock.
-- **Wholesalers** – handle bulk orders and track customer relationships.
-- **Warehouse staff** – monitor low‑stock alerts and fulfil orders.
-- **Business owners** – view revenue, top‑selling products, and customer trends.
+* Retail stores – manage physical product inventory and walk-in orders.
+* E-commerce sellers – keep online product listings in sync with actual stock.
+* Wholesalers – handle bulk orders and track customer relationships.
+* Warehouse staff – monitor low-stock alerts and fulfil orders.
+* Business owners – view revenue, top-selling products, and customer trends.
 
 ---
 
-## ✨ Core Features
+# ✨ Core Features
 
-### 📦 Product Management
-- Add, edit, delete products with **name, SKU, description, category, price, and stock quantity**.
-- **Unique SKU enforcement** – prevents duplicate identifiers.
-- **Price must be > 0**, **quantity cannot be negative** – validated on backend.
-- **Search** by name or SKU, **filter by category**, **sort** by name, price, stock, or date.
-- **CSV Import** – bulk‑upload products from a CSV file (validates duplicates).
-- **CSV Export** – download product list as a spreadsheet.
-- **Bulk delete** – select multiple products and remove them in one click.
-- **Low‑stock visual alerts** (red highlight when quantity ≤ 5).
+## 📦 Product Management
 
-### 👥 Customer Management
-- Add, search, and delete customers with **full name, email, phone, and address**.
-- **Unique email validation** on the backend.
-- **Phone validation** ensures correct format.
-- **Customer Order History** – click the cart icon next to a customer to see all their orders (filtered automatically).
+* Add, edit, delete products with:
 
-### 🛒 Order Management
-- Create orders by selecting a customer and one or more products.
-- **Inventory validation** – order is rejected if quantity exceeds available stock.
-- **Automatic total calculation** on the backend.
-- **Stock automatically decreases** when an order is placed (atomic transaction).
-- **Order status workflow**: Pending → Confirmed → Processing → Completed.
-- **Cancel orders** – stock is restored instantly.
-- **Filter orders** by status and **date range**.
-- **Sortable columns** (ID, customer, total, date).
-- **CSV Export** of order list.
-- **PDF Invoice** – generate a professional invoice with one click.
-- **Print Invoice** – browser‑native print layout for physical copies.
+  * Name
+  * SKU
+  * Description
+  * Category
+  * Price
+  * Stock Quantity
 
-### 📊 Dashboard & Analytics
-- **Summary cards**: Total Products, Total Customers, Total Orders, Total Revenue.
-- **Revenue Trend** bar chart – daily revenue aggregated from orders.
-- **Order Status Breakdown** – interactive pie chart.
-- **Top Selling Products** and **Top Customers** lists.
-- **Low‑Stock Products** & **Out‑of‑Stock Products** tables.
-- **Recent Orders** with status badges.
+* Unique SKU enforcement prevents duplicate identifiers.
 
-### ⚙️ Additional Production Features
-- **Dark mode** toggle – preference saved locally.
-- **Notifications bell** in header – shows count of low‑stock products; click to navigate to those items.
-- **Profile page** – upload company logo and edit business information.
-- **Delete confirmation dialogs** – prevents accidental deletions.
-- **Responsive design** – works on desktop, tablet, and mobile.
-- **Lazy loaded routes** for optimal frontend performance.
+* Price must be greater than 0.
+
+* Quantity cannot be negative.
+
+* Search by name or SKU.
+
+* Filter by category.
+
+* Sort by:
+
+  * Name
+  * Price
+  * Stock
+  * Date
+
+### Additional Features
+
+* CSV Import for bulk uploads.
+* CSV Export for spreadsheet downloads.
+* Bulk Delete for multiple products.
+* Low-stock visual alerts when quantity ≤ 5.
 
 ---
 
-## 🏗️ Technical Architecture
+## 👥 Customer Management
 
-### Backend (Python + FastAPI)
-- **Clean Architecture**: Routes → Services → Repositories → Database
-- **PostgreSQL** with SQLAlchemy ORM and Alembic migrations
-- **Pydantic** request/response validation
-- **Rate limiting** on all endpoints (via `slowapi`)
-- **CORS** configured for frontend origin
-- **Health check** endpoint (`/health`)
-- **Structured JSON logging**
-- **Atomic database transactions** for order creation and cancellation
+* Add customers with:
 
-### Frontend (React + Vite)
-- **Tailwind CSS** with a custom Indigo/Slate palette
-- **Shadcn‑inspired** reusable components (Button, Modal, Table, Badge, etc.)
-- **React Query** for server state management (caching, refetching, optimistic updates)
-- **React Hook Form** for form validation
-- **React Router** with lazy loading
-- **Recharts** for dashboard charts
-- **jsPDF & html2canvas** for PDF invoice generation
-- **react‑hot‑toast** for notifications
+  * Full Name
+  * Email
+  * Phone
+  * Address
 
-### DevOps & Deployment
-- **Docker** – Backend and Frontend each have their own `Dockerfile` (multi‑stage builds)
-- **Docker Compose** – runs PostgreSQL, Backend, and Frontend together with health checks and named volumes
-- **GitHub Actions** – CI pipeline that builds the frontend on every push
-- **Render** – hosts the backend Docker image
-- **Vercel** – hosts the frontend (SPA rewrites configured)
-- **Neon** – free PostgreSQL database (production)
+* Search and delete customers.
+
+* Unique email validation.
+
+* Phone format validation.
+
+* Customer Order History with one-click order filtering.
 
 ---
 
-## 📋 Business Rules Enforced
+## 🛒 Order Management
 
-| Rule | Implementation |
-|------|----------------|
-| Product SKU must be unique | Backend validation + unique index in DB |
-| Customer email must be unique | Backend validation + unique index |
-| Price must be > 0 | Pydantic `gt=0` |
-| Quantity cannot be negative | Pydantic `ge=0` |
-| Order only if stock sufficient | Service layer checks before deduction |
-| Order total calculated automatically | Backend computes `sum(price * qty)` |
-| Inventory decreases on order | Atomic transaction: stock reduced & order created |
-| Inventory restored on cancel | Cancelled order triggers stock increase |
-| Valid HTTP status codes | 201 Created, 404 Not Found, 409 Conflict, 422 Validation, 500 Internal |
+### Order Creation
+
+* Select a customer.
+* Add one or more products.
+* Automatic total calculation.
+* Inventory validation before checkout.
+
+### Inventory Automation
+
+* Stock decreases automatically when an order is placed.
+* Atomic database transactions ensure consistency.
+* Cancelled orders automatically restore inventory.
+
+### Workflow
+
+```text
+Pending → Confirmed → Processing → Completed
+```
+
+### Additional Features
+
+* Filter orders by status.
+* Filter orders by date range.
+* Sortable columns.
+* CSV Export.
+* PDF Invoice generation.
+* Print-friendly invoices.
 
 ---
 
-## 📡 API Endpoints (Base: `/api/v1`)
+## 📊 Dashboard & Analytics
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST`   | `/products/`              | Create product |
-| `GET`    | `/products/`              | List products (search, filter, sort, paginate) |
-| `GET`    | `/products/{id}`          | Get product by ID |
-| `PUT`    | `/products/{id}`          | Update product |
-| `DELETE` | `/products/{id}`          | Delete product |
-| `POST`   | `/products/import`        | CSV import (multipart) |
-| `POST`   | `/customers/`             | Create customer |
-| `GET`    | `/customers/`             | List customers (search, sort, paginate) |
-| `GET`    | `/customers/{id}`         | Get customer by ID |
-| `DELETE` | `/customers/{id}`         | Delete customer |
-| `POST`   | `/orders/`                | Create order |
-| `GET`    | `/orders/`                | List orders (filter by status, date range, sort, paginate) |
-| `GET`    | `/orders/{id}`            | Get order details (includes items) |
-| `PUT`    | `/orders/{id}/status`     | Update order status |
-| `DELETE` | `/orders/{id}`            | Cancel order |
-| `GET`    | `/dashboard/`             | Dashboard analytics |
+### Summary Metrics
 
-All responses follow a consistent structure:  
+* Total Products
+* Total Customers
+* Total Orders
+* Total Revenue
+
+### Visual Analytics
+
+* Revenue Trend Bar Chart
+* Order Status Pie Chart
+
+### Insights
+
+* Top Selling Products
+* Top Customers
+* Recent Orders
+* Low-Stock Products
+* Out-of-Stock Products
+
+---
+
+## ⚙️ Additional Production Features
+
+* Dark Mode toggle.
+* Notification bell for low-stock alerts.
+* Profile page for business details and logo uploads.
+* Delete confirmation dialogs.
+* Fully responsive design.
+* Lazy-loaded routes for performance optimization.
+
+---
+
+# 🏗️ Technical Architecture
+
+## Backend (FastAPI + Python)
+
+### Architecture
+
+```text
+Routes
+   ↓
+Services
+   ↓
+Repositories
+   ↓
+Database
+```
+
+### Technologies
+
+* FastAPI
+* SQLAlchemy ORM
+* PostgreSQL
+* Alembic Migrations
+* Pydantic Validation
+* SlowAPI Rate Limiting
+
+### Backend Features
+
+* CORS Configuration
+* Health Check Endpoint (`/health`)
+* Structured JSON Logging
+* Atomic Transactions
+
+---
+
+## Frontend (React + Vite)
+
+### Technologies
+
+* React
+* Vite
+* Tailwind CSS
+* React Query
+* React Hook Form
+* React Router
+* Recharts
+* jsPDF
+* html2canvas
+* react-hot-toast
+
+### UI Design
+
+* Indigo/Slate theme
+* Shadcn-inspired reusable components
+* Responsive layouts
+* Optimized client-side caching
+
+---
+
+## 🚢 DevOps & Deployment
+
+### Containerization
+
+* Docker
+* Multi-stage builds
+* Docker Compose
+
+### Cloud Hosting
+
+* Render → Backend
+* Vercel → Frontend
+* Neon → PostgreSQL Database
+
+### CI/CD
+
+* GitHub Actions
+* Automated frontend builds on every push
+
+---
+
+# 📋 Business Rules Enforced
+
+| Rule                            | Implementation           |
+| ------------------------------- | ------------------------ |
+| SKU must be unique              | Database unique index    |
+| Customer email must be unique   | Database unique index    |
+| Price > 0                       | Pydantic Validation      |
+| Quantity ≥ 0                    | Pydantic Validation      |
+| Stock availability required     | Service Layer Validation |
+| Order total auto-calculated     | Backend Computation      |
+| Inventory deduction on order    | Atomic Transaction       |
+| Inventory restoration on cancel | Automatic Stock Recovery |
+| Valid HTTP Status Codes         | REST Standards           |
+
+---
+
+# 📡 API Endpoints
+
+**Base URL:** `/api/v1`
+
+## Products
+
+| Method | Endpoint           |
+| ------ | ------------------ |
+| POST   | `/products/`       |
+| GET    | `/products/`       |
+| GET    | `/products/{id}`   |
+| PUT    | `/products/{id}`   |
+| DELETE | `/products/{id}`   |
+| POST   | `/products/import` |
+
+## Customers
+
+| Method | Endpoint          |
+| ------ | ----------------- |
+| POST   | `/customers/`     |
+| GET    | `/customers/`     |
+| GET    | `/customers/{id}` |
+| DELETE | `/customers/{id}` |
+
+## Orders
+
+| Method | Endpoint              |
+| ------ | --------------------- |
+| POST   | `/orders/`            |
+| GET    | `/orders/`            |
+| GET    | `/orders/{id}`        |
+| PUT    | `/orders/{id}/status` |
+| DELETE | `/orders/{id}`        |
+
+## Dashboard
+
+| Method | Endpoint      |
+| ------ | ------------- |
+| GET    | `/dashboard/` |
+
+---
+
+## Standard API Response
+
 ```json
 {
   "success": true,
-  "message": "...",
-  "data": {...}
+  "message": "Operation successful",
+  "data": {}
 }
-Pagination is included for list endpoints:
+```
 
-json
+### Pagination Format
+
+```json
 {
   "success": true,
-  "data": [...],
+  "data": [],
   "page": 1,
   "limit": 20,
   "total": 42
 }
-🐳 Running Locally with Docker
-Clone the repository
+```
 
-bash
+---
+
+# 🐳 Running Locally with Docker
+
+## Clone Repository
+
+```bash
 git clone https://github.com/AdityaIITBHU26/stockflow-pro.git
 cd stockflow-pro
-Set up environment files
+```
 
-bash
+## Configure Environment
+
+```bash
 cp backend/.env.example backend/.env
-# (For local dev the defaults work, for production update DATABASE_URL)
-Start all services
+```
 
-bash
+Update environment variables if required.
+
+## Start Services
+
+```bash
 docker compose up -d
-Access
+```
 
-Frontend: http://localhost
+## Access Applications
 
-Backend docs: http://localhost:8000/docs
+| Service      | URL                          |
+| ------------ | ---------------------------- |
+| Frontend     | http://localhost             |
+| Swagger Docs | http://localhost:8000/docs   |
+| Health Check | http://localhost:8000/health |
 
-Health check: http://localhost:8000/health
+---
 
-🧪 Testing
-Backend: Pytest tests in backend/tests/ (currently skipped in CI to avoid DB dependency issues, but runnable locally with a test PostgreSQL instance).
+# 🧪 Testing
 
-Frontend: Components can be tested with React Testing Library (setup already present).
+## Backend
 
-CI: GitHub Actions workflow builds the frontend on every push to ensure code integrity.
+```bash
+pytest
+```
 
-📁 Project Structure
-text
+Located in:
+
+```text
+backend/tests/
+```
+
+## Frontend
+
+* React Testing Library supported.
+* Component testing setup included.
+
+## CI
+
+GitHub Actions automatically validates frontend builds.
+
+---
+
+# 📁 Project Structure
+
+```text
 stockflow-pro/
 ├── backend/
 │   ├── app/
-│   │   ├── api/v1/endpoints/    # Route handlers
-│   │   ├── core/                # Config, security, logging
-│   │   ├── db/                  # Database session and base model
-│   │   ├── models/              # SQLAlchemy models
-│   │   ├── repositories/        # Data access layer
-│   │   ├── schemas/             # Pydantic request/response models
-│   │   └── services/            # Business logic
-│   ├── alembic/                 # Database migrations
-│   ├── tests/                   # Backend tests
+│   │   ├── api/v1/endpoints/
+│   │   ├── core/
+│   │   ├── db/
+│   │   ├── models/
+│   │   ├── repositories/
+│   │   ├── schemas/
+│   │   └── services/
+│   ├── alembic/
+│   ├── tests/
 │   ├── Dockerfile
 │   └── requirements.txt
+│
 ├── frontend/
 │   ├── src/
-│   │   ├── api/                 # Axios API clients
-│   │   ├── components/          # Reusable UI and layout components
-│   │   ├── context/             # Theme and app context
-│   │   ├── hooks/               # Custom React Query hooks
-│   │   ├── pages/               # Page components (Dashboard, Products, etc.)
-│   │   └── utils/               # CSV export, PDF invoice helpers
+│   │   ├── api/
+│   │   ├── components/
+│   │   ├── context/
+│   │   ├── hooks/
+│   │   ├── pages/
+│   │   └── utils/
 │   ├── Dockerfile
 │   └── package.json
+│
 ├── docker-compose.yml
 ├── .github/workflows/ci.yml
 └── README.md
-🙌 Acknowledgements
-Built as a demonstration of full‑stack engineering skills using modern tools:
-FastAPI, React, Tailwind CSS, Docker, PostgreSQL, Render, Vercel.
+```
+
+---
+
+# 🙌 Acknowledgements
+
+Built as a demonstration of full-stack engineering skills using modern technologies:
+
+* FastAPI
+* React
+* Tailwind CSS
+* Docker
+* PostgreSQL
+* Render
+* Vercel
+
 
